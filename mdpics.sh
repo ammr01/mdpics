@@ -44,14 +44,14 @@ get_pic(){
     # get the url name from url details file
     local __URL_NAME="$(/usr/bin/env gawk -F": " -v COUNTER="$__COUNTER" 'BEGIN{c=1} /^urlname: /{if (c==COUNTER) {print $2;exit} else{c++;next}}' "$__TMP/urlsdetails" )"
 
-    # send GET request to the url to get the picture, store the picture in __TMP file
-    # and store request/response headers in __TMP6 file
+    # send GET request to the url to get the picture, store the picture in new file in the temp dir "file name is the picture number"
+    # and store request/response headers in new file in the temp dir "file name is the picture number, followed by _headers word"
     /usr/bin/env curl -L -v "$__URL" -o  "$__TMP/$__COUNTER" 2> "$__TMP/${__COUNTER}_headers"  || exit 1
 
-    # encode the picture using base64 encode, and store result in __TMP2
+    # encode the picture using base64 encode, and store result in new file in the temp dir "file name is the picture number, followed by _encoded word"
     /usr/bin/env base64 --wrap=0 "$__TMP/$__COUNTER" > "$__TMP/${__COUNTER}_encoded" || exit 1
 
-    # get image type "suffix/extinsion", by searching for content-type in __TMP6 
+    # get image type "suffix/extinsion", by searching for content-type in headers file
     local __SUFFIX="$(/usr/bin/env gawk  '/content-type:/ {match($0,/content-type: image\/(.*)/,arr);gsub("\r","",arr[1]); print arr[1]}' "$__TMP/${__COUNTER}_headers"  )"
     
     # if the first method failed, then try using "file" utility to get file type
